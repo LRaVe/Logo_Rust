@@ -1,0 +1,9 @@
+[package]
+name = "logo"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+regex = "1"
+santiago = "1"
+svg_fmt = "0.4"
