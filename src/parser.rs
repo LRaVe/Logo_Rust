@@ -1,19 +1,33 @@
-// Logo Parser Module
-// Syntactic analysis using Santiago grammar library
-
 use std::rc::Rc;
 use santiago::grammar::Grammar;
 use santiago::parser::{self, Tree};
 use crate::lexer::Lexeme;
 
 /// Define the Logo grammar using Santiago
+#[allow(dead_code)]
 pub fn grammar() -> Grammar<()> {
     santiago::grammar!(
         "program" => rules "command" "program"
                    ;
         "program" => empty
                    ;
-        "command" => rules "order" "number"
+        "command" => rules "move"
+                   ;
+        "command" => rules "state"
+                   ;
+        "command" => rules "loop"
+                    ;
+        "move" => rules "order" "number"
+                    ;
+        "loop" => rules "loop_kw" "number" "lbracket" "program" "rbracket"
+                   ;
+        "loop_kw" => lexemes "LOOP"
+               ;
+        "lbracket" => lexemes "LBRACKET"
+               ;
+        "rbracket" => lexemes "RBRACKET"
+               ;
+        "state" => lexemes "STATE"
                    ;
         "order" => lexemes "FORWARD" 
                 ;
@@ -25,10 +39,12 @@ pub fn grammar() -> Grammar<()> {
                 ;
         "number" => lexemes "NUMBER"
                   ;
+        
     )
 }
 
-/// Convert lexemes to Santiago format (Rc-wrapped)
+
+#[allow(dead_code)]
 pub fn prepare_lexemes(lexemes: &[Lexeme]) -> Vec<Rc<santiago::lexer::Lexeme>> {
     lexemes.iter().map(|l| {
         Rc::new(santiago::lexer::Lexeme {
@@ -42,7 +58,8 @@ pub fn prepare_lexemes(lexemes: &[Lexeme]) -> Vec<Rc<santiago::lexer::Lexeme>> {
     }).collect()
 }
 
-/// Parse lexeme sequence and return the parse trees
+
+#[allow(dead_code)]
 pub fn parse(lexemes: &[Lexeme]) -> Result<Vec<Rc<Tree<()>>>, String> {
     let grammar = grammar();
     let santiago_lexemes = prepare_lexemes(lexemes);
@@ -53,6 +70,7 @@ pub fn parse(lexemes: &[Lexeme]) -> Result<Vec<Rc<Tree<()>>>, String> {
     }
 }
 
+#[allow(dead_code)]
 pub fn parse_first(lexemes: &[Lexeme]) -> Result<Rc<Tree<()>>, String> {
     let trees = parse(lexemes)?;
     trees
@@ -61,7 +79,8 @@ pub fn parse_first(lexemes: &[Lexeme]) -> Result<Rc<Tree<()>>, String> {
         .ok_or_else(|| "No parse tree found".to_string())
 }
 
-/// Pretty-print the parse tree
+
+#[allow(dead_code)]
 pub fn print_parse_tree(tree: &Tree<()>, indent: usize) {
     let indent_str = "  ".repeat(indent);
     match tree {

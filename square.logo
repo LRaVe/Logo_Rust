@@ -1,7 +1,10 @@
-forward 100
+pendown
+right 90
+forward 50
 left 90
-forward 100
-left 90
-forward 100
-left 90
-forward 100
+penup
+forward 50
+pendown
+repeat 8 [ forward 25 right 45 ]
+
+

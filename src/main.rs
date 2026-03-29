@@ -25,12 +25,12 @@ fn main() {
     let lexer = LogoLexer::new();
     let tokens = lexer.lex(&input);
     
-    println!("Tokens extracted:");
+    println!("Tokens récupérés:");
     for (i, token) in tokens.iter().enumerate() {
         println!("  [{}] {} \"{}\" at ({}, {})", 
                  i, token.kind, token.raw, token.position.0, token.position.1);
     }
-    println!("Total tokens: {}\n", tokens.len());
+    println!("Tokens: {}\n", tokens.len());
 
     
     match parser::parse(&tokens) {
@@ -38,7 +38,7 @@ fn main() {
             if trees.is_empty() {
                 eprintln!("No valid parse tree found\n");
             } else {
-                println!("OK Syntax valid - program structure is correct");
+                println!("OK Syntax valid\n");
                 println!("Found {} parse tree(s)\n", trees.len());
 
                 for (i, tree) in trees.iter().enumerate() {
@@ -49,7 +49,7 @@ fn main() {
             }
         }
         Err(e) => {
-            eprintln!("X Syntax error: {}\n", e);
+            eprintln!("Syntax error: {}\n", e);
             return;
         }
     }
@@ -58,7 +58,7 @@ fn main() {
     let parse_tree = match parser::parse_first(&tokens) {
         Ok(tree) => tree,
         Err(e) => {
-            eprintln!("X Cannot build AST without parse tree: {}", e);
+            eprintln!("Cannot build AST without parse tree: {}", e);
             return;
         }
     };
@@ -66,7 +66,7 @@ fn main() {
     let ast = match ast::from_parse_tree(&parse_tree) {
         Ok(ast) => ast,
         Err(e) => {
-            eprintln!("X AST build error: {}", e);
+            eprintln!("AST build error: {}", e);
             return;
         }
     };
@@ -85,7 +85,7 @@ fn main() {
     match fs::write(output_path, svg) {
         Ok(_) => println!("SVG generated: {}", output_path),
         Err(e) => {
-            eprintln!("X Failed to write {}: {}", output_path, e);
+            eprintln!("Failed to write {}: {}", output_path, e);
             return;
         }
     }

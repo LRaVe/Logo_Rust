@@ -1,11 +1,11 @@
-use crate::ast::{Ast, Number, Order};
+use crate::ast::{Ast, Number, Order, PenState};
 use svg_fmt::{line_segment, red, BeginSvg, EndSvg};
 
 pub struct LogoCompiler {
     x: f32,
     y: f32,
-    angle_deg: f32,
-    pen_down: bool,
+    angle: f32,
+    pen: bool,
     width: f32,
     height: f32,
     body: String,
@@ -16,8 +16,8 @@ impl LogoCompiler {
         Self {
             x: 100.0,
             y: 100.0,
-            angle_deg: 0.0,
-            pen_down: true,
+            angle: 0.0,
+            pen: true,
             width,
             height,
             body: String::new(),
@@ -47,6 +47,16 @@ impl LogoCompiler {
                     self.execute(order, number.0 as f32);
                 }
             }
+            Ast::State(state) => {
+                self.pen = matches!(state, PenState::Down);
+            }
+            Ast::Loop(count_ast, body_ast) => {
+                if let Some(count) = extract_number(count_ast) {
+                    for _ in 0..count.0.max(0) {
+                        self.walk(body_ast);
+                    }
+                }
+            }
             Ast::Order(_) | Ast::Number(_) | Ast::Empty => {}
         }
     }
@@ -55,17 +65,17 @@ impl LogoCompiler {
         match order {
             Order::Forward => self.move_by(value),
             Order::Backward => self.move_by(-value),
-            Order::Left => self.angle_deg += value,
-            Order::Right => self.angle_deg -= value,
+            Order::Left => self.angle += value,
+            Order::Right => self.angle -= value,
         }
     }
 
     fn move_by(&mut self, distance: f32) {
-        let rad = self.angle_deg.to_radians();
+        let rad = self.angle.to_radians();
         let new_x = self.x + distance * rad.cos();
         let new_y = self.y - distance * rad.sin();
 
-        if self.pen_down {
+        if self.pen {
             let segment = line_segment(self.x, self.y, new_x, new_y).color(red()).width(2.0);
             self.body.push_str("    ");
             self.body.push_str(&format!("{}\n", segment));
